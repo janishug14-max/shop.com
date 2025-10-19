@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mein Dropship Shop</title>
+<style>
+  :root{--primary:#0b74de;--accent:#ff7a59;--bg:#f6f8fb;--card:#ffffff;--muted:#666}
+  *{box-sizing:border-box}
+  body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; margin:0; background:var(--bg); color:#111}
+  header{background:linear-gradient(90deg,var(--primary),#0a66c2);color:#fff;padding:18px 12px;text-align:center}
+  header h1{margin:0;font-size:20px}
+  .wrap{max-width:1100px;margin:20px auto;padding:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 6px 20px rgba(10,20,40,0.06);display:flex;flex-direction:column}
+  .card img{width:100%;height:160px;object-fit:cover;border-radius:8px}
+  .price{color:var(--primary);font-weight:700;margin-top:8px}
+  .btn{background:var(--primary);color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;display:inline-block;border:0;cursor:pointer}
+  .btn.secondary{background:#222;color:#fff}
+  .topbar{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .cart{background:#fff;padding:10px;border-radius:10px;min-width:260px;box-shadow:0 6px 20px rgba(10,20,40,0.06)}
+  .cart h3{margin:0 0 8px 0;font-size:16px}
+  .cart-list{max-height:260px;overflow:auto;margin-bottom:8px}
+  .cart-item{display:flex;gap:10px;align-items:center;border-bottom:1px solid #f0f0f0;padding:8px 0}
+  .cart-item img{width:48px;height:48px;object-fit:cover;border-radius:6px}
+  .muted{color:var(--muted);font-size:13px}
+  footer{padding:18px;text-align:center;color:var(--muted);font-size:14px;margin-top:22px}
+  .layout{display:grid;grid-template-columns:1fr 320px;gap:18px}
+  @media(max-width:900px){ .layout{grid-template-columns:1fr} .cart{order:2} }
+  form.checkout{background:var(--card);padding:12px;border-radius:10px}
+  input,textarea,select{width:100%;padding:8px;margin:6px 0 12px;border:1px solid #e6e9ef;border-radius:6px;font-size:14px}
+  .small{font-size:13px;color:var(--muted)}
+  .legal{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Dein Shopname • Schnelle Lieferung</h1>
+</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <strong>Produkte</strong>
+      <div class="small muted">Sichere Bestellungen • Retouren geregelte Abwicklung</div>
+    </div>
+    <div id="cartSummary" class="cart">
+      <h3>Warenkorb</h3>
+      <div class="cart-list" id="cartList">
+        <div class="muted">Warenkorb ist leer</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Summe:</strong> <span id="cartTotal">CHF 0.00</span></div>
+        <button class="btn" id="checkoutBtn">Zur Kasse</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <main>
+      <div class="grid" id="productGrid">
+        <!-- Produkte werden per JS eingefügt -->
+      </div>
+
+      <section style="margin-top:18px">
+        <h3>Warum bei uns bestellen?</h3>
+        <ul>
+          <li>Keine Lagerhaltung: Wir kümmern uns um Versand und Logistik</li>
+          <li>Qualitätskontrolle: Muster geprüft</li>
+          <li>Kundenservice in Deutsch</li>
+        </ul>
+      </section>
+
+      <section style="margin-top:18px" id="legalSection">
+        <div class="legal">
+          <div style="background:#fff;padding:10px;border-radius:8px">
+            <h4>Impressum</h4>
+            <div class="small">Firma: Dein Name<br>Adresse: Strasse 1, 8000 Zürich<br>E-Mail: support@deinshop.ch</div>
+          </div>
+          <div style="background:#fff;padding:10px;border-radius:8px">
+            <h4>AGB (Kurz)</h4>
+            <div class="small">Lieferzeit 7–21 Tage; Rückgabe 14 Tage; Garantie und Gewährleistung nach Schweizer Recht.</div>
+          </div>
+          <div style="background:#fff;padding:10px;border-radius:8px">
+            <h4>Datenschutz</h4>
+            <div class="small">Wir speichern Bestelldaten zur Abwicklung; E-Mail für Versandinfos; keine Weitergabe an Dritte ohne Zustimmung.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside>
+      <div class="cart" style="margin-bottom:16px">
+        <h3>Checkout</h3>
+        <form id="checkoutForm" class="checkout" onsubmit="return submitOrder(event)">
+          <label for="name">Name</label>
+          <input id="name" name="name" required>
+          <label for="email">E‑Mail</label>
+          <input id="email" name="email" type="email" required>
+          <label for="address">Lieferadresse</label>
+          <input id="address" name="address" required>
+          <label for="notes">Bestellnotiz (optional)</label>
+          <textarea id="notes" name="notes" rows="3"></textarea>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn" type="submit">Bestellung absenden</button>
+            <button type="button" class="btn secondary" onclick="clearCart()">Leeren</button>
+          </div>
+          <div class="small muted" style="margin-top:8px">Hinweis: Dies ist ein Demo‑Checkout. Für echte Zahlungen integriere Stripe/PayPal oder Shopify.</div>
+        </form>
+      </div>
+
+      <div style="background:#fff;padding:12px;border-radius:10px">
+        <h4>Kontakt</h4>
+        <div class="small">support@deinshop.ch<br>Mo–Fr 09:00–17:00</div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer>
+  © <span id="year"></span> Dein Shopname • Impressum • AGB • Datenschutz
+</footer>
+
+<script>
+/* Produktdaten: passe hier an */
+const products = [
+  { id: "p1", title: "Sportkopfhörer", price: 29.90, img:"https://via.placeholder.com/800x600?text=Sportkopfh%C3%B6rer"},
+  { id: "p2", title: "Smart Trinkflasche", price: 24.90, img:"https://via.placeholder.com/800x600?text=Trinkflasche"},
+  { id: "p3", title: "LED Schreibtischlampe", price: 39.90, img:"https://via.placeholder.com/800x600?text=Lampe"}
+];
+
+const cart = {}; // {productId: qty}
+
+function formatCHF(n){ return "CHF " + n.toFixed(2); }
+
+function renderProducts(){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = "";
+  products.forEach(p=>{
+    const el = document.createElement('div'); el.className='card';
+    el.innerHTML = `
+      <img src="${p.img}" alt="${p.title}">
+      <h3>${p.title}</h3>
+      <div class="price">${formatCHF(p.price)}</div>
+      <div style="margin-top:auto;display:flex;gap:8px">
+        <button class="btn" onclick="addToCart('${p.id}')">In den Warenkorb</button>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function addToCart(id){
+  cart[id] = (cart[id]||0) + 1;
+  renderCart();
+}
+
+function renderCart(){
+  const list = document.getElementById('cartList');
+  list.innerHTML = "";
+  const ids = Object.keys(cart);
+  if(ids.length===0){ list.innerHTML = '<div class="muted">Warenkorb ist leer</div>'; document.getElementById('cartTotal').textContent = formatCHF(0); return; }
+  let total = 0;
+  ids.forEach(id=>{
+    const p = products.find(x=>x.id===id);
+    const qty = cart[id];
+    total += p.price * qty;
+    const item = document.createElement('div'); item.className='cart-item';
+    item.innerHTML = `
+      <img src="${p.img}" alt="${p.title}">
+      <div style="flex:1">
+        <div style="font-weight:600">${p.title}</div>
+        <div class="small muted">${formatCHF(p.price)} × <input type="number" min="1" value="${qty}" style="width:56px" onchange="changeQty('${id}',this.value)"></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700">${formatCHF(p.price*qty)}</div>
+        <div><button class="btn secondary" onclick="removeItem('${id}')">Entfernen</button></div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+  document.getElementById('cartTotal').textContent = formatCHF(total);
+}
+
+function changeQty(id,val){
+  const n = Math.max(1,parseInt(val)||1);
+  cart[id] = n;
+  renderCart();
+}
+
+function removeItem(id){
+  delete cart[id];
+  renderCart();
+}
+
+function clearCart(){
+  for(const k in cart) delete cart[k];
+  renderCart();
+}
+
+function submitOrder(e){
+  e.preventDefault();
+  const ids = Object.keys(cart);
+  if(ids.length===0){ alert("Warenkorb ist leer."); return false; }
+  const data = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    notes: document.getElementById('notes').value.trim(),
+    items: ids.map(id => ({ id, qty: cart[id] }))
+  };
+  // Demo: Bestellbestätigung lokal anzeigen. Für echte Shops: POST an Backend / Zahlungsanbieter
+  console.log("BESTELLUNG (Demo):", data);
+  alert("Danke! Die Bestellung wurde (Demo) erfasst. Öffne die Konsole für Details.");
+  // Snapshot: clear cart and form
+  clearCart();
+  e.target.reset();
+  return false;
+}
+
+/* init */
+renderProducts();
+renderCart();
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('checkoutBtn').addEventListener('click', ()=>{ window.scrollTo({top:document.getElementById('checkoutForm').offsetTop-20, behavior:'smooth'}) });
+</script> 
+</body>
+</html>
